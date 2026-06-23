@@ -2,7 +2,9 @@
 Description=kiln-controller
 
 [Service]
-ExecStart=__KILN_DIR__/venv/bin/python __KILN_DIR__/kiln-controller.py
+# __KILN_DIR__ and __UV__ are substituted with real paths by start-on-boot.
+WorkingDirectory=__KILN_DIR__
+ExecStart=__UV__ run kiln-controller.py
 
 [Install]
 WantedBy=multi-user.target

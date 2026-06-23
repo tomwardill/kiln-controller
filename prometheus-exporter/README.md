@@ -9,21 +9,22 @@ WebSocket pushes a full state payload roughly once per second (the oven's
 `time_step`) whether or not a firing is in progress, so the metrics always
 reflect the latest thermocouple reading.
 
-## Install
+## Run
+
+Like the rest of the project, the exporter runs under [uv](https://docs.astral.sh/uv/).
+Its dependencies are declared inline in `kiln_exporter.py` (PEP 723), so uv
+fetches them automatically on first run — no manual install step:
 
 ```bash
 cd prometheus-exporter
-pip install -r requirements.txt
-```
-
-## Run
-
-```bash
-./kiln_exporter.py --kiln-url ws://localhost:8081/status --port 9090
+uv run kiln_exporter.py --kiln-url ws://localhost:8081/status --port 9090
 ```
 
 Point `--kiln-url` at your kiln-controller host (it listens on `listening_port`,
 `8081` by default). Then scrape `http://<exporter-host>:9090/metrics`.
+
+> A `requirements.txt` is also provided for non-uv setups
+> (`pip install -r requirements.txt` then `./kiln_exporter.py ...`).
 
 ### Run on boot (systemd)
 
@@ -33,13 +34,12 @@ cd prometheus-exporter
 sudo systemctl start kiln-exporter
 ```
 
-`install-service.sh` substitutes the real install path into
-`kiln-exporter.service` (no home directory is hardcoded), copies it to
-`/etc/systemd/system/`, and enables it. Edit the `Environment=` lines in
-`kiln-exporter.service` before installing if your kiln is not on
-`localhost:8081`. The unit invokes `kiln_exporter.py` directly via its
-`#!/usr/bin/env python` shebang, so make sure the dependencies in
-`requirements.txt` are installed for that interpreter.
+`install-service.sh` substitutes the real install path and the `uv` binary
+location into `kiln-exporter.service` (neither a home directory nor the uv path
+is hardcoded), copies it to `/etc/systemd/system/`, and enables it. The unit
+runs the exporter with `uv run kiln_exporter.py`, so uv resolves the inline
+dependencies on start. Edit the `Environment=` lines in `kiln-exporter.service`
+before installing if your kiln is not on `localhost:8081`.
 
 ### Configuration
 

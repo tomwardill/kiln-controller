@@ -4,8 +4,9 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
-# __EXPORTER_DIR__ is substituted with the real path by install-service.sh.
-ExecStart=__EXPORTER_DIR__/kiln_exporter.py
+# __EXPORTER_DIR__ and __UV__ are substituted with real paths by install-service.sh.
+WorkingDirectory=__EXPORTER_DIR__
+ExecStart=__UV__ run kiln_exporter.py
 Restart=on-failure
 RestartSec=5
 # Override defaults here if your kiln is not on localhost:8081, e.g.:

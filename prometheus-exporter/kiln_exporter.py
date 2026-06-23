@@ -1,4 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.9"
+# dependencies = [
+#     "prometheus_client>=0.17",
+#     "websocket-client>=1.0",
+# ]
+# ///
 """
 Standalone Prometheus exporter for kiln-controller.
 
@@ -9,9 +16,8 @@ The WebSocket pushes a full state payload roughly once per second (the oven's
 time_step) regardless of whether a firing is in progress, so the exported
 metrics always reflect the latest reading.
 
-Usage:
-    pip install -r requirements.txt
-    ./kiln_exporter.py --kiln-url ws://localhost:8081/status --port 9090
+Dependencies are declared inline (PEP 723), so uv fetches them on first run:
+    uv run kiln_exporter.py --kiln-url ws://localhost:8081/status --port 9090
 
 All options can also be set via environment variables (see --help).
 """
