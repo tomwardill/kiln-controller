@@ -25,6 +25,24 @@ pip install -r requirements.txt
 Point `--kiln-url` at your kiln-controller host (it listens on `listening_port`,
 `8081` by default). Then scrape `http://<exporter-host>:9090/metrics`.
 
+### Run on boot (systemd)
+
+```bash
+cd prometheus-exporter
+./install-service.sh
+sudo systemctl start kiln-exporter
+```
+
+`install-service.sh` substitutes the real install path into
+`kiln-exporter.service` (no home directory is hardcoded), copies it to
+`/etc/systemd/system/`, and enables it. Edit the `Environment=` lines in
+`kiln-exporter.service` before installing if your kiln is not on
+`localhost:8081`. The unit invokes `kiln_exporter.py` directly via its
+`#!/usr/bin/env python` shebang, so make sure the dependencies in
+`requirements.txt` are installed for that interpreter.
+
+### Configuration
+
 All flags can also be set via environment variables:
 
 | Flag                | Env var            | Default                       |

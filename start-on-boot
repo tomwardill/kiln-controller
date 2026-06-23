@@ -1,3 +1,7 @@
 #!/bin/bash
-sudo cp /home/pi/kiln-controller/lib/init/kiln-controller.service /etc/systemd/system/
+# Install the kiln-controller systemd service, deriving the install directory
+# from this script's location so no home directory is hardcoded.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+sed "s#__KILN_DIR__#${SCRIPT_DIR}#g" "$SCRIPT_DIR/lib/init/kiln-controller.service" \
+    | sudo tee /etc/systemd/system/kiln-controller.service > /dev/null
 sudo systemctl enable kiln-controller
