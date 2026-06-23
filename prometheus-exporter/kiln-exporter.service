@@ -1,0 +1,17 @@
+[Unit]
+Description=kiln-controller Prometheus exporter
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+# __EXPORTER_DIR__ and __UV__ are substituted with real paths by install-service.sh.
+WorkingDirectory=__EXPORTER_DIR__
+ExecStart=__UV__ run kiln_exporter.py
+Restart=on-failure
+RestartSec=5
+# Override defaults here if your kiln is not on localhost:8081, e.g.:
+# Environment=KILN_URL=ws://192.168.1.50:8081/status
+# Environment=EXPORTER_PORT=9090
+
+[Install]
+WantedBy=multi-user.target

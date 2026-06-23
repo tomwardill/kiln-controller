@@ -70,9 +70,12 @@ Download [Raspberry PI OS](https://www.raspberrypi.org/software/). Use Rasberry 
     $ sudo apt-get dist-upgrade
     $ git clone https://github.com/jbruce12000/kiln-controller
     $ cd kiln-controller
-    $ python3 -m venv venv
-    $ source venv/bin/activate
-    $ pip install -r requirements.txt
+    $ curl -LsSf https://astral.sh/uv/install.sh | sh
+
+This project uses [uv](https://docs.astral.sh/uv/) to manage Python and
+dependencies. `uv run` (see below) creates the environment and installs
+everything from `pyproject.toml` automatically on first use, so there's no
+separate install step.
 
 *Note: The above steps work on ubuntu if you prefer*
 
@@ -98,21 +101,19 @@ All parameters are defined in config.py. You need to read through config.py care
 
 ## Testing
 
-After you've completed connecting all the hardware together, there are scripts to test the thermocouple and to test the output to the solid state relay. Read the scripts below and then start your testing. First, activate the virtual environment like so...
+After you've completed connecting all the hardware together, there are scripts to test the thermocouple and to test the output to the solid state relay. Read the scripts below and then start your testing.
 
-     $ source venv/bin/activate
+Test the thermocouple with:
 
-then test the thermocouple with:
-
-     $ ./test-thermocouple.py
+     $ uv run test-thermocouple.py
 
 then test the output with:
 
-     $ ./test-output.py
+     $ uv run test-output.py
 
 and you can use this script to examine each pin's state including input/output/voltage on your board:
 
-     $ ./gpioreadall.py
+     $ uv run gpioreadall.py
 
 ## PID Tuning
 
@@ -124,12 +125,17 @@ There is a state view that can help with tuning. It shows the P,I, and D paramet
 
 ### Server Startup
 
-    $ source venv/bin/activate; ./kiln-controller.py
+    $ uv run kiln-controller.py
 
 ### Autostart Server onBoot
-If you want the server to autostart on boot, run the following command:
+If you want the server to autostart on boot, run the `start-on-boot` script from
+the directory you cloned into:
 
-    $ /home/pi/kiln-controller/start-on-boot
+    $ ./start-on-boot
+
+It installs a systemd service that launches the server with uv. The install
+directory and the `uv` binary location are detected automatically, so make sure
+`uv` is on your PATH before running it.
 
 ### Client Access
 

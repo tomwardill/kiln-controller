@@ -1,0 +1,2 @@
+prometheus_client>=0.17
+websocket-client>=1.0
