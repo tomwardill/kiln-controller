@@ -9,7 +9,7 @@ requests
 # for folks running raspberry pis
 # we have no proof of anyone using another board yet, but when that
 # happens, you might want to comment this out.
-rpi-lgpio
+rpi-lgpio; sys_platform == "linux" and (platform_machine == "aarch64" or platform_machine == "armv7l")
 
 # List of all supported adafruit modules for thermocouples
 adafruit-circuitpython-max31855
