@@ -129,6 +129,85 @@ def find_profile(wanted):
             return profile
     return None
 
+@app.get('/api/schedules')
+def handle_list_schedules():
+    log.info("api list schedules")
+    bottle.response.content_type = 'application/json'
+    return get_profiles()
+
+@app.get('/api/schedules/<name>')
+def handle_get_schedule(name):
+    log.info("api get schedule %s" % name)
+    profile = find_profile(name)
+    if profile is None:
+        bottle.response.status = 404
+        return { "success" : False, "error" : "schedule %s not found" % name }
+    return profile
+
+@app.post('/api/schedules')
+def handle_create_schedule():
+    log.info("api create schedule")
+    profile = bottle.request.json
+    error = validate_profile(profile)
+    if error:
+        bottle.response.status = 400
+        return { "success" : False, "error" : error }
+    if not save_profile(profile, force=False):
+        bottle.response.status = 409
+        return { "success" : False, "error" : "schedule %s already exists" % profile['name'] }
+    bottle.response.status = 201
+    return { "success" : True, "schedule" : profile['name'] }
+
+@app.put('/api/schedules/<name>')
+def handle_update_schedule(name):
+    log.info("api update schedule %s" % name)
+    profile = bottle.request.json
+    if isinstance(profile, dict):
+        profile.setdefault('name', name)
+    error = validate_profile(profile)
+    if error:
+        bottle.response.status = 400
+        return { "success" : False, "error" : error }
+    if profile['name'] != name:
+        bottle.response.status = 400
+        return { "success" : False, "error" : "schedule name in body does not match url" }
+    if find_profile(name) is None:
+        bottle.response.status = 201
+    save_profile(profile, force=True)
+    return { "success" : True, "schedule" : name }
+
+@app.delete('/api/schedules/<name>')
+def handle_delete_schedule(name):
+    log.info("api delete schedule %s" % name)
+    profile = find_profile(name)
+    if profile is None:
+        bottle.response.status = 404
+        return { "success" : False, "error" : "schedule %s not found" % name }
+    delete_profile(profile)
+    return { "success" : True, "schedule" : name }
+
+def validate_profile(profile):
+    '''
+    sanity check a schedule/profile submitted via the api.
+    returns an error message, or None if the profile is valid.
+    '''
+    if not isinstance(profile, dict):
+        return "profile must be a json object"
+    name = profile.get('name')
+    if not name or not isinstance(name, str):
+        return "profile must have a name"
+    # the name becomes a filename, so keep it to a single path component
+    if name != os.path.basename(name) or name in ('.', '..'):
+        return "invalid profile name"
+    data = profile.get('data')
+    if not isinstance(data, list) or len(data) < 2:
+        return "profile data must contain at least two [seconds, temperature] points"
+    for point in data:
+        if not isinstance(point, (list, tuple)) or len(point) != 2 or \
+                any(isinstance(value, bool) or not isinstance(value, (int, float)) for value in point):
+            return "each data point must be a [seconds, temperature] pair of numbers"
+    return None
+
 @app.route('/picoreflow/:filename#.*#')
 def send_static(filename):
     log.debug("serving %s" % filename)
