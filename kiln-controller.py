@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import time
 import os
 import sys
 import logging
@@ -218,7 +217,7 @@ def get_websocket_from_request():
     env = bottle.request.environ
     wsock = env.get('wsgi.websocket')
     if not wsock:
-        abort(400, 'Expected WebSocket request.')
+        bottle.abort(400, 'Expected WebSocket request.')
     return wsock
 
 
@@ -226,9 +225,15 @@ def get_websocket_from_request():
 def handle_control():
     wsock = get_websocket_from_request()
     log.info("websocket (control) opened")
+    # NOTE: wsock.receive() blocks cooperatively until the client sends a
+    # message, so these handler loops must not sleep: this server is not
+    # monkey-patched, so a time.sleep() here stalls the whole process and
+    # delays the handshakes of other websockets.
     while True:
         try:
             message = wsock.receive()
+            if message is None:
+                break
             if message:
                 log.info("Received (control): %s" % message)
                 msgdict = json.loads(message)
@@ -254,7 +259,6 @@ def handle_control():
                 elif msgdict.get("cmd") == "STOP":
                     log.info("Stop command received")
                     oven.abort_run()
-            time.sleep(1)
         except WebSocketError as e:
             log.error(e)
             break
@@ -302,7 +306,6 @@ def handle_storage():
 
                     wsock.send(json.dumps(msgdict))
                     wsock.send(get_profiles())
-            time.sleep(1) 
         except WebSocketError:
             break
     log.info("websocket (storage) closed")
@@ -315,10 +318,11 @@ def handle_config():
     while True:
         try:
             message = wsock.receive()
+            if message is None:
+                break
             wsock.send(get_config())
         except WebSocketError:
             break
-        time.sleep(1)
     log.info("websocket (config) closed")
 
 
@@ -330,10 +334,11 @@ def handle_status():
     while True:
         try:
             message = wsock.receive()
+            if message is None:
+                break
             wsock.send("Your message was: %r" % message)
         except WebSocketError:
             break
-        time.sleep(1)
     log.info("websocket (status) closed")
 
 
