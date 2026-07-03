@@ -40,6 +40,10 @@ ovenWatcher = OvenWatcher(oven)
 # this ovenwatcher is used in the oven class for restarts
 oven.set_ovenwatcher(ovenWatcher)
 
+if getattr(config, 'mqtt_enabled', False):
+    from mqttOutput import MQTTOutput
+    ovenWatcher.add_observer(MQTTOutput(config))
+
 @app.route('/')
 def index():
     return bottle.redirect('/picoreflow/index.html')

@@ -23,6 +23,7 @@ Turns a Raspberry Pi into an inexpensive, web-enabled kiln controller.
   * automatic restarts if there is a power outage or other event
   * support for a watcher to page you via slack if you kiln is out of whack
   * easy scheduling of future kiln runs
+  * MQTT output with Home Assistant auto discovery
 
 
 **Run Kiln Schedule**
@@ -98,6 +99,21 @@ All parameters are defined in config.py. You need to read through config.py care
 | pid parameters | | Used to tune your kiln. See PID Tuning. |
 | simulate | True | Simulate a kiln. Used to test the software by new users so they can check out the features. |
  
+
+### MQTT
+
+The kiln can publish its state to an MQTT broker. This is output only -
+the kiln cannot be controlled over MQTT. Set `mqtt_enabled = True` and
+`mqtt_host` in config.py to enable it. The full oven state (temperature,
+target, state, schedule, cost, etc) is published as json to
+`kiln/state`, and `kiln/availability` reports `online`/`offline` (with a
+last-will message so an unexpected crash also shows as offline).
+
+Home Assistant auto discovery is enabled by default
+(`mqtt_ha_discovery`). If your Home Assistant is connected to the same
+broker, a "Kiln" device appears automatically with sensors for
+temperature, target temperature, heat rate, state, schedule, runtime,
+schedule length, cost, plus heating and catching-up binary sensors.
 
 ## Testing
 
