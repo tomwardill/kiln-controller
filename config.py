@@ -15,6 +15,31 @@ log_format = '%(asctime)s %(levelname)s %(name)s: %(message)s'
 listening_port = 8081
 
 ########################################################################
+# MQTT output
+#
+# Publishes the oven state (temperature, target, state, cost, etc) to an
+# MQTT broker. This is output only - the kiln cannot be controlled over
+# MQTT. State is published to <mqtt_topic_prefix>/state and availability
+# to <mqtt_topic_prefix>/availability.
+#
+# If mqtt_ha_discovery is enabled, Home Assistant discovers the kiln
+# automatically as a device with sensors for temperature, target, state,
+# schedule, runtime, cost and more.
+mqtt_enabled = False
+mqtt_host = "localhost"
+mqtt_port = 1883
+mqtt_username = None    # set both to enable authentication
+mqtt_password = None
+mqtt_topic_prefix = "kiln"
+mqtt_client_id = "kiln-controller"
+# minimum seconds between state publishes. State changes (IDLE/RUNNING/...)
+# are always published immediately.
+mqtt_publish_interval = 5
+mqtt_ha_discovery = True
+mqtt_ha_discovery_prefix = "homeassistant"
+mqtt_device_name = "Kiln"
+
+########################################################################
 # Cost Information
 #
 # This is used to calculate a cost estimate before a run. It's also used
