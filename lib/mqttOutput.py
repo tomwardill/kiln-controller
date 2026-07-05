@@ -127,6 +127,17 @@ class MQTTOutput:
                 'icon': 'mdi:chart-line',
                 'value_template': "{{ value_json.profile if value_json.profile else 'none' }}",
             }),
+            ('sensor', 'current_stage', {
+                'name': 'Current stage',
+                'icon': 'mdi:stairs',
+                'state_class': 'measurement',
+                'value_template': '{{ value_json.current_stage | default(0) }}',
+            }),
+            ('sensor', 'total_stages', {
+                'name': 'Schedule stages',
+                'icon': 'mdi:format-list-numbered',
+                'value_template': '{{ value_json.total_stages | default(0) }}',
+            }),
             ('sensor', 'runtime', {
                 'name': 'Runtime',
                 'device_class': 'duration',

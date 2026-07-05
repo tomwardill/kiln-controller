@@ -70,6 +70,8 @@ def make_state(**overrides):
         'heat_rate': 100.1,
         'totaltime': 3600,
         'profile': 'cone-6',
+        'total_stages': 5,
+        'current_stage': 2,
         'catching_up': False,
     }
     state.update(overrides)
@@ -93,6 +95,8 @@ def test_on_connect_publishes_availability_and_discovery(output):
     assert output.client.published[0] == ('kiln/availability', 'online', True)
     topics = output.client.topics()
     assert 'homeassistant/sensor/kiln/temperature/config' in topics
+    assert 'homeassistant/sensor/kiln/current_stage/config' in topics
+    assert 'homeassistant/sensor/kiln/total_stages/config' in topics
     assert 'homeassistant/binary_sensor/kiln/heating/config' in topics
     # all discovery messages must be retained and reference the state topic
     for topic, payload, retain in output.client.published[1:]:
