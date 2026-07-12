@@ -543,6 +543,16 @@ function startOffsetNow(data) {
   return seekTimeForTemperature(data, lastTemp);
 }
 
+function fmtFinishClock(secondsFromNow) {
+  const end = new Date(Date.now() + secondsFromNow * 1000);
+  const time = end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const dayMs = 86400000;
+  const days = Math.round((new Date(end).setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0)) / dayMs);
+  if (days === 0) return time;
+  if (days === 1) return time + ' tomorrow';
+  return end.toLocaleDateString([], { weekday: 'short' }) + ' ' + time;
+}
+
 function renderSummary() {
   const wrap = $('profile_summary');
   const p = currentProfile();
@@ -557,7 +567,7 @@ function renderSummary() {
   $('sum_total').textContent = fmtHMS(total);
 
   const offset = startOffsetNow(data);
-  $('sum_eta').textContent = fmtHMS(Math.max(0, total - offset));
+  $('sum_eta').textContent = fmtFinishClock(Math.max(0, total - offset));
 
   const note = $('sum_note');
   if (offset > 0) {
