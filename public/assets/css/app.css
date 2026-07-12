@@ -374,6 +374,17 @@ select {
 
 .summary-table td { font-variant-numeric: tabular-nums; }
 
+/* current stage of the running schedule */
+.summary-table tr.step-active td {
+  background: rgba(201, 133, 0, 0.16);
+  color: var(--ink);
+}
+.summary-table tr.step-active td:first-child {
+  box-shadow: inset 3px 0 0 var(--series-live);
+  color: var(--series-live);
+  font-weight: 700;
+}
+
 .summary-note { margin: 0; font-size: 13px; color: var(--ink-muted); }
 
 /* ---------- point table ---------- */
