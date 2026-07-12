@@ -337,6 +337,46 @@ select {
 .swatch-profile { background: var(--series-profile); }
 .swatch-live    { background: var(--series-live); }
 
+/* ---------- profile summary ---------- */
+
+.profile-summary {
+  margin-top: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  display: grid;
+  gap: 10px;
+}
+
+.summary-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+}
+
+.summary-fact { display: inline-flex; align-items: baseline; gap: 8px; }
+
+.summary-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+.summary-value {
+  font-size: 16px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.summary-table-wrap { overflow-x: auto; }
+
+.summary-table td { font-variant-numeric: tabular-nums; }
+
+.summary-note { margin: 0; font-size: 13px; color: var(--ink-muted); }
+
 /* ---------- point table ---------- */
 
 .point-table-wrap { margin-top: 12px; overflow-x: auto; }

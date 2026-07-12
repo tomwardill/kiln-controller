@@ -20,11 +20,13 @@ const cfg = {
   time_scale_profile: 'm',
   kwh_rate: 0,
   currency_type: '$',
+  seek_start: false,
 };
 
 let profiles = [];          // as received from /storage
 let selectedName = null;    // name of the selected profile
 let liveData = [];          // [[runtime, temperature], ...] for the current run
+let lastTemp = null;        // latest kiln temperature from /status
 let runState = 'IDLE';
 let lastRunState = null;
 let editing = false;
@@ -510,6 +512,83 @@ function addPoint(x, y) {
   renderTable();
 }
 
+// ---------------------------------------------------------------- profile summary
+
+// Port of Profile.find_next_time_from_temperature (lib/oven.py): the time at
+// which the schedule first reaches `temperature` on a rising segment.
+function seekTimeForTemperature(data, temperature) {
+  let time = 0;
+  for (let i = 1; i < data.length; i++) {
+    const [x1, y1] = data[i - 1];
+    const [x2, y2] = data[i];
+    if (y2 >= temperature && y1 <= temperature) {
+      time = x1 > x2 || y1 >= y2 ? 0 : ((temperature - y1) * (x2 - x1)) / (y2 - y1) + x1;
+      if (time === 0 && y1 === y2) {
+        // a hold segment at this temperature restarts from its beginning
+        time = x1;
+        break;
+      }
+    }
+  }
+  return time;
+}
+
+// Seconds of the schedule that would be skipped if the run started now,
+// mirroring Oven.get_start_from_temperature + config.seek_start.
+function startOffsetNow(data) {
+  if (!cfg.seek_start || lastTemp === null || !data.length) return 0;
+  const target0 = interpProfile(data, 0);
+  const startTarget = target0 === null ? data[0][1] : target0;
+  if (lastTemp <= startTarget + 5) return 0;
+  return seekTimeForTemperature(data, lastTemp);
+}
+
+function renderSummary() {
+  const wrap = $('profile_summary');
+  const p = currentProfile();
+  if (editing || !p || !Array.isArray(p.data) || p.data.length < 2) {
+    wrap.hidden = true;
+    return;
+  }
+  const data = p.data;
+  const total = data[data.length - 1][0];
+
+  $('sum_steps').textContent = String(data.length - 1);
+  $('sum_total').textContent = fmtHMS(total);
+
+  const offset = startOffsetNow(data);
+  $('sum_eta').textContent = fmtHMS(Math.max(0, total - offset));
+
+  const note = $('sum_note');
+  if (offset > 0) {
+    note.textContent = 'The kiln is already at ' + Math.round(lastTemp) + tempUnit() +
+      ', so starting now would skip the first ' + fmtHMS(offset) + ' of the schedule.';
+    note.hidden = false;
+  } else {
+    note.hidden = true;
+  }
+
+  $('sum_th_temp').textContent = 'Temperature (' + tempUnit() + ')';
+  $('sum_th_rate').textContent = tempUnit() + '/' + (TIME_UNIT_LABEL[cfg.time_scale_slope] || 'hr');
+  let html = '';
+  for (let i = 1; i < data.length; i++) {
+    const [x1, y1] = data[i - 1];
+    const [x2, y2] = data[i];
+    const dt = x2 - x1;
+    const dps = dt > 0 ? (y2 - y1) / dt : 0;
+    const perUnit = Math.round(slopePerUnit(dps));
+    const rate = (perUnit > 0 ? '▲ ' : perUnit < 0 ? '▼ ' : '▶ ') + Math.abs(perUnit);
+    html += '<tr>' +
+      '<td class="num">' + i + '</td>' +
+      '<td>' + Math.round(y1) + ' → ' + Math.round(y2) + '</td>' +
+      '<td>' + fmtHMS(dt) + '</td>' +
+      '<td class="rate">' + rate + '</td>' +
+      '</tr>';
+  }
+  $('sum_tbody').innerHTML = html;
+  wrap.hidden = false;
+}
+
 // ---------------------------------------------------------------- edit mode
 
 function enterEdit(fresh) {
@@ -532,6 +611,7 @@ function enterEdit(fresh) {
   $('point_table_wrap').hidden = false;
   chartSvg.classList.add('editing');
   hideTooltip();
+  renderSummary();
   renderChart();
   renderTable();
   if (fresh) $('profile_name').focus();
@@ -547,6 +627,7 @@ function exitEdit() {
   $('point_table_wrap').hidden = true;
   chartSvg.classList.remove('editing');
   renderChart();
+  renderSummary();
 }
 
 function saveProfile() {
@@ -703,11 +784,13 @@ function renderSelect() {
     sel.appendChild(opt);
   }
   updateRunButtons();
+  renderSummary();
 }
 
 $('profile_select').addEventListener('change', (e) => {
   selectedName = e.target.value;
   renderChart();
+  renderSummary();
 });
 
 // ---------------------------------------------------------------- socket handlers
@@ -731,9 +814,11 @@ const wsStatus = connect('/status', {
       toast('Run complete', 'success', 15000);
     }
     if (runState === 'RUNNING') liveData.push([x.runtime, x.temperature]);
+    if (Number.isFinite(x.temperature)) lastTemp = x.temperature;
     if (!editing) {
       updateStatusUI(x);
       renderChart();
+      renderSummary();
     }
     lastRunState = runState;
   },
@@ -748,9 +833,11 @@ const wsConfig = connect('/config', {
     cfg.time_scale_profile = x.time_scale_profile || cfg.time_scale_profile;
     cfg.kwh_rate = x.kwh_rate;
     cfg.currency_type = x.currency_type || cfg.currency_type;
+    cfg.seek_start = Boolean(x.seek_start);
     document.querySelectorAll('[data-tempunit]').forEach((el) => { el.textContent = tempUnit(); });
     renderChart();
     if (editing) renderTable();
+    else renderSummary();
   },
 });
 
