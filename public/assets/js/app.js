@@ -750,13 +750,13 @@ function updateStatusUI(x) {
     const remaining = Math.max(0, (x.totaltime || 0) - (x.runtime || 0));
     $('eta').textContent = fmtHMS(remaining);
     const pct = x.totaltime > 0 ? Math.min(100, (x.runtime / x.totaltime) * 100) : 0;
-    $('progress_row').hidden = false;
+    $('chip_progress').hidden = false;
     $('progress_bar').style.width = pct + '%';
     $('progress_label').textContent = Math.floor(pct) + '%';
   } else {
     $('target_temp').textContent = '--';
     $('eta').textContent = '--:--:--';
-    $('progress_row').hidden = true;
+    $('chip_progress').hidden = true;
     $('progress_bar').style.width = '0%';
   }
 

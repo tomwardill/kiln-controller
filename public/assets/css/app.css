@@ -179,35 +179,10 @@ main {
   transition: width 0.4s ease;
 }
 
+.chip-meter-progress > span { background: var(--good); }
+
 .chip-warning { color: var(--warning); border-color: var(--warning); }
 .chip-hazard  { color: #fff; background: var(--critical); border-color: var(--critical); }
-
-/* ---------- progress ---------- */
-
-.progress-row { display: flex; align-items: center; gap: 10px; }
-
-.progress {
-  flex: 1;
-  height: 8px;
-  border-radius: 4px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  overflow: hidden;
-}
-.progress > div {
-  height: 100%;
-  width: 0%;
-  background: var(--good);
-  transition: width 1s linear;
-}
-.progress-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--ink-2);
-  font-variant-numeric: tabular-nums;
-  min-width: 4ch;
-  text-align: right;
-}
 
 /* ---------- toolbar / forms ---------- */
 
