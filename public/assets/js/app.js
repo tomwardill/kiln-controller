@@ -29,6 +29,8 @@ let liveData = [];          // [[runtime, temperature], ...] for the current run
 let lastTemp = null;        // latest kiln temperature from /status
 let runState = 'IDLE';
 let lastRunState = null;
+let runProfile = null;      // name of the profile currently running
+let runStage = 0;           // 1-based segment index of the run, from /status
 let editing = false;
 let editData = [];          // working copy of points while editing
 let dragIdx = -1;
@@ -580,6 +582,8 @@ function renderSummary() {
 
   $('sum_th_temp').textContent = 'Temperature (' + tempUnit() + ')';
   $('sum_th_rate').textContent = tempUnit() + '/' + (TIME_UNIT_LABEL[cfg.time_scale_slope] || 'hr');
+  const active = runState === 'RUNNING' || runState === 'PAUSED';
+  const activeStage = active && p.name === runProfile ? runStage : 0;
   let html = '';
   for (let i = 1; i < data.length; i++) {
     const [x1, y1] = data[i - 1];
@@ -588,7 +592,7 @@ function renderSummary() {
     const dps = dt > 0 ? (y2 - y1) / dt : 0;
     const perUnit = Math.round(slopePerUnit(dps));
     const rate = (perUnit > 0 ? '▲ ' : perUnit < 0 ? '▼ ' : '▶ ') + Math.abs(perUnit);
-    html += '<tr>' +
+    html += '<tr' + (i === activeStage ? ' class="step-active"' : '') + '>' +
       '<td class="num">' + i + '</td>' +
       '<td>' + Math.round(y1) + ' → ' + Math.round(y2) + '</td>' +
       '<td>' + fmtHMS(dt) + '</td>' +
@@ -820,6 +824,8 @@ const wsStatus = connect('/status', {
     }
 
     runState = x.state;
+    runProfile = x.profile || null;
+    runStage = Number.isFinite(x.current_stage) ? x.current_stage : 0;
     if (lastRunState === 'RUNNING' && runState !== 'RUNNING' && runState !== 'PAUSED') {
       toast('Run complete', 'success', 15000);
     }
