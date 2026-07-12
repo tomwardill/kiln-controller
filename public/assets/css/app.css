@@ -87,7 +87,7 @@ body {
 /* ---------- layout ---------- */
 
 main {
-  max-width: 1100px;
+  max-width: 1440px;
   margin: 0 auto;
   padding: 16px;
   padding-left: max(16px, env(safe-area-inset-left));
@@ -336,6 +336,30 @@ select {
 .swatch { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
 .swatch-profile { background: var(--series-profile); }
 .swatch-live    { background: var(--series-live); }
+
+/* ---------- chart layout ---------- */
+
+.chart-layout { display: grid; gap: 12px; }
+.chart-col { min-width: 0; }
+
+/* On wide screens, put the profile summary beside the chart. The layout
+   falls back to stacked when the summary is hidden (nothing to show) or
+   when :has() is unsupported. */
+@media (min-width: 1100px) {
+  .chart-layout:has(> .profile-summary:not([hidden])) {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+    gap: 0 20px;
+    align-items: start;
+  }
+  .chart-layout:has(> .profile-summary:not([hidden])) > .profile-summary {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+    border-left: 1px solid var(--border);
+    padding-left: 20px;
+    align-self: stretch;
+  }
+}
 
 /* ---------- profile summary ---------- */
 

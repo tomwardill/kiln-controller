@@ -96,32 +96,36 @@
 
   <p class="edit-hint" id="edit_hint" hidden>Drag points on the chart, edit the table below, or double-tap the chart to add a point.</p>
 
-  <div class="chart-wrap" id="chart_wrap">
-   <svg id="chart" role="img" aria-label="Firing schedule and live kiln temperature"></svg>
-   <div id="chart_xhair" class="xhair" hidden></div>
-   <div id="chart_tip" class="tip" hidden></div>
-  </div>
+  <div class="chart-layout">
+   <div class="chart-col">
+    <div class="chart-wrap" id="chart_wrap">
+     <svg id="chart" role="img" aria-label="Firing schedule and live kiln temperature"></svg>
+     <div id="chart_xhair" class="xhair" hidden></div>
+     <div id="chart_tip" class="tip" hidden></div>
+    </div>
 
-  <div class="legend">
-   <span class="legend-item"><span class="swatch swatch-profile"></span>Schedule</span>
-   <span class="legend-item"><span class="swatch swatch-live"></span>Kiln</span>
-  </div>
+    <div class="legend">
+     <span class="legend-item"><span class="swatch swatch-profile"></span>Schedule</span>
+     <span class="legend-item"><span class="swatch swatch-live"></span>Kiln</span>
+    </div>
+   </div>
 
-  <div id="profile_summary" class="profile-summary" hidden>
-   <div class="summary-facts">
-    <span class="summary-fact"><span class="summary-label">Steps</span><span id="sum_steps" class="summary-value">--</span></span>
-    <span class="summary-fact"><span class="summary-label">Total length</span><span id="sum_total" class="summary-value">--:--:--</span></span>
-    <span class="summary-fact"><span class="summary-label">Finish if started now</span><span id="sum_eta" class="summary-value">--:--</span></span>
+   <div id="profile_summary" class="profile-summary" hidden>
+    <div class="summary-facts">
+     <span class="summary-fact"><span class="summary-label">Steps</span><span id="sum_steps" class="summary-value">--</span></span>
+     <span class="summary-fact"><span class="summary-label">Total length</span><span id="sum_total" class="summary-value">--:--:--</span></span>
+     <span class="summary-fact"><span class="summary-label">Finish if started now</span><span id="sum_eta" class="summary-value">--:--</span></span>
+    </div>
+    <div class="summary-table-wrap">
+     <table class="point-table summary-table">
+      <thead>
+       <tr><th>Step</th><th id="sum_th_temp">Temperature</th><th>Length</th><th id="sum_th_rate">Rate</th></tr>
+      </thead>
+      <tbody id="sum_tbody"></tbody>
+     </table>
+    </div>
+    <p id="sum_note" class="summary-note" hidden></p>
    </div>
-   <div class="summary-table-wrap">
-    <table class="point-table summary-table">
-     <thead>
-      <tr><th>Step</th><th id="sum_th_temp">Temperature</th><th>Length</th><th id="sum_th_rate">Rate</th></tr>
-     </thead>
-     <tbody id="sum_tbody"></tbody>
-    </table>
-   </div>
-   <p id="sum_note" class="summary-note" hidden></p>
   </div>
 
   <div id="point_table_wrap" class="point-table-wrap" hidden>
