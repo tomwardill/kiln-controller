@@ -46,6 +46,26 @@ def test_find_time_odd_profile():
     assert time == 16676.0
 
 
+def test_get_num_stages():
+    profile = get_profile()
+
+    assert profile.get_num_stages() == 5
+
+
+def test_get_current_stage():
+    profile = get_profile()
+
+    # boundaries in test-fast.json: 0, 3600, 10800, 14400, 16400, 19400
+    assert profile.get_current_stage(0) == 1
+    assert profile.get_current_stage(3000) == 1
+    assert profile.get_current_stage(3600) == 2
+    assert profile.get_current_stage(12000) == 3
+    assert profile.get_current_stage(17000) == 5
+    # at or past the end of the schedule we stay on the last stage
+    assert profile.get_current_stage(19400) == 5
+    assert profile.get_current_stage(99999) == 5
+
+
 def test_find_x_given_y_on_line_from_two_points():
     profile = get_profile()
 

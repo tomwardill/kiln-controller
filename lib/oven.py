@@ -481,6 +481,8 @@ class Oven(threading.Thread):
             'kwh_rate': config.kwh_rate,
             'currency_type': config.currency_type,
             'profile': self.profile.name if self.profile else None,
+            'total_stages': self.profile.get_num_stages() if self.profile else 0,
+            'current_stage': self.profile.get_current_stage(self.runtime) if self.profile else 0,
             'pidstats': self.pid.pidstats,
             'catching_up': self.catching_up,
         }
@@ -737,6 +739,20 @@ class Profile():
 
     def get_duration(self):
         return max([t for (t, x) in self.data])
+
+    def get_num_stages(self):
+        '''number of segments between the profile data points'''
+        return max(len(self.data) - 1, 0)
+
+    def get_current_stage(self, time):
+        '''1-based index of the segment containing time'''
+        num_stages = self.get_num_stages()
+        if num_stages == 0:
+            return 0
+        for i in range(1, len(self.data)):
+            if time < self.data[i][0]:
+                return i
+        return num_stages
 
     #  x = (y-y1)(x2-x1)/(y2-y1) + x1
     @staticmethod
